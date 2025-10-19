@@ -22,7 +22,7 @@ internal interface GreenContract {
     }
 
     sealed interface Effect {
-        object GoToBlue : Effect
+        data class GoToBlue(val counter: Int) : Effect
     }
 }
 
@@ -46,13 +46,16 @@ internal class GreenViewModel : ViewModel() {
 
     fun onEvent(event: GreenContract.Event) {
         when (event) {
-            GreenContract.Event.ButtonClicked -> setEffect(GreenContract.Effect.GoToBlue)
+            GreenContract.Event.ButtonClicked -> {
+                setEffect { GreenContract.Effect.GoToBlue(counter = 10) }
+            }
         }
     }
 
-    private fun setEffect(effect: GreenContract.Effect) {
+    private fun setEffect(effect: () -> GreenContract.Effect) {
+
         viewModelScope.launch {
-            effectEmitter.send(effect)
+            effectEmitter.send(effect())
         }
     }
 }
