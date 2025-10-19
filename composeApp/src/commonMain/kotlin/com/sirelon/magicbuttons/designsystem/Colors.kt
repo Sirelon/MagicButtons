@@ -6,8 +6,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
 
+@Composable
+fun AppTheme(content: @Composable () -> Unit) {
+    MaterialTheme(
+        colorScheme = appColors(),
+        content = content,
+    )
+}
+
 @ReadOnlyComposable
 @Composable
-fun appColors(): ColorScheme = MaterialTheme.colorScheme.copy(
+private fun appColors(): ColorScheme = MaterialTheme.colorScheme.copy(
     background = Color(0xFFE3E3E3)
 )
