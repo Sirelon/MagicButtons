@@ -15,6 +15,8 @@ kotlin {
     androidTarget {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
+            // https://kotlinlang.org/docs/context-parameters.html#how-to-enable-context-parameters
+            freeCompilerArgs.add("-Xcontext-parameters")
         }
     }
     
@@ -56,6 +58,8 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.koin.compose)
+            implementation(libs.koin.compose.viewmodel)
+            implementation(libs.koin.core)
             implementation(libs.coil.compose)
             implementation(libs.coil.network.ktor)
             implementation(libs.kotlinx.serialization.json)
