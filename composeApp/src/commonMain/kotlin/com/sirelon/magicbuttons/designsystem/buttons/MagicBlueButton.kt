@@ -1,6 +1,9 @@
 package com.sirelon.magicbuttons.designsystem.buttons
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -12,6 +15,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -39,13 +44,22 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun MagicBlueButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-
     val radiusDp = 16.dp
+
+    val interaction = remember { MutableInteractionSource() }
+
+    val pressed by interaction.collectIsPressedAsState()
 
     Box(
         // TODO: Size
         modifier = modifier
             .size(width = 150.dp, height = 60.dp)
+            .clickable(
+                enabled = true,
+                onClick = onClick,
+                indication = null,
+                interactionSource = interaction,
+            )
             .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
             .padding(8.dp)
             .dropShadow(shape = RoundedCornerShape(radiusDp)) {
@@ -115,7 +129,7 @@ private fun Modifier.blueBg(radiusDp: Dp): Modifier = this.drawWithCache {
 }
 
 @Composable
-private fun BoxScope.ButtonText(text: String) {
+internal fun BoxScope.ButtonText(text: String) {
     Text(
         modifier = Modifier.align(Alignment.Center),
         text = text,
