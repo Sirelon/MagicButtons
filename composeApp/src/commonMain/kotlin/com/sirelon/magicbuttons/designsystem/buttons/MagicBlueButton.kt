@@ -1,5 +1,6 @@
 package com.sirelon.magicbuttons.designsystem.buttons
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -22,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithCache
@@ -57,8 +59,6 @@ fun MagicBlueButton(
     val radiusDp = 16.dp
 
     val pressed by interaction.collectIsPressedAsState()
-
-//    val pressed = true
 
     val outlineBorderAlpha by animateFloatAsState(
         targetValue = if (pressed) 0.3f else 0f,
@@ -148,50 +148,92 @@ fun MagicBlueButton(
                     blendMode = BlendMode.Clear
                 )
             }
-
-            .drawWithCache {
-                val strokeWidth = 1.dp.toPx()
-
+            .composed {
                 val mainColor = Color(0xB2CCFF)
-                val bgGradient = Brush.verticalGradient(
-                    colors = if (pressed) {
-                        listOf(
-                            mainColor.copy(alpha = 0.15f),
-                            mainColor.copy(alpha = 0.2f),
+                val color1 by animateColorAsState(
+                    if (pressed) mainColor.copy(alpha = 0.15f) else mainColor.copy(alpha = 0.3f)
+                )
+                val color2 by animateColorAsState(
+                    if (pressed) mainColor.copy(alpha = 0.2f) else mainColor.copy(alpha = 0.1f)
+                )
+                Modifier.drawWithCache {
+                    val strokeWidth = 1.dp.toPx()
+                    val bgGradient = Brush.verticalGradient(
+                        colors = listOf(
+                            color1,
+                            color2,
                         )
-                    } else {
-                        listOf(
-                            mainColor.copy(alpha = 0.3f),
-                            mainColor.copy(alpha = 0.10f)
+                    )
+
+                    val borderGradient = Brush.verticalGradient(
+                        colors = listOf(
+                            mainColor.copy(alpha = 0.1f),
+                            mainColor.copy(alpha = 0.05f)
+                        )
+                    )
+
+                    val cornerRadius = CornerRadius(radiusDp.toPx())
+
+                    onDrawBehind {
+                        drawRoundRect(
+                            brush = bgGradient,
+                            blendMode = BlendMode.Hardlight,
+                            cornerRadius = cornerRadius,
+                        )
+
+                        drawRoundRect(
+                            brush = borderGradient,
+                            style = Stroke(
+                                width = strokeWidth,
+                            ),
+                            cornerRadius = cornerRadius,
                         )
                     }
-                )
-
-                val borderGradient = Brush.verticalGradient(
-                    colors = listOf(
-                        mainColor.copy(alpha = 0.1f),
-                        mainColor.copy(alpha = 0.05f)
-                    )
-                )
-
-                val cornerRadius = CornerRadius(radiusDp.toPx())
-
-                onDrawBehind {
-                    drawRoundRect(
-                        brush = bgGradient,
-                        blendMode = BlendMode.Hardlight,
-                        cornerRadius = cornerRadius,
-                    )
-
-                    drawRoundRect(
-                        brush = borderGradient,
-                        style = Stroke(
-                            width = strokeWidth,
-                        ),
-                        cornerRadius = cornerRadius,
-                    )
                 }
             }
+
+//            .drawWithCache {
+//                val strokeWidth = 1.dp.toPx()
+//                val mainColor = Color(0xB2CCFF)
+//                val bgGradient = Brush.verticalGradient(
+//                    colors = if (pressed) {
+//                        listOf(
+//                            mainColor.copy(alpha = 0.15f),
+//                            mainColor.copy(alpha = 0.2f),
+//                        )
+//                    } else {
+//                        listOf(
+//                            mainColor.copy(alpha = 0.3f),
+//                            mainColor.copy(alpha = 0.10f)
+//                        )
+//                    }
+//                )
+//
+//                val borderGradient = Brush.verticalGradient(
+//                    colors = listOf(
+//                        mainColor.copy(alpha = 0.1f),
+//                        mainColor.copy(alpha = 0.05f)
+//                    )
+//                )
+//
+//                val cornerRadius = CornerRadius(radiusDp.toPx())
+//
+//                onDrawBehind {
+//                    drawRoundRect(
+//                        brush = bgGradient,
+//                        blendMode = BlendMode.Hardlight,
+//                        cornerRadius = cornerRadius,
+//                    )
+//
+//                    drawRoundRect(
+//                        brush = borderGradient,
+//                        style = Stroke(
+//                            width = strokeWidth,
+//                        ),
+//                        cornerRadius = cornerRadius,
+//                    )
+//                }
+//            }
 //            .blueBg(radiusDp)
     ) {
         ButtonText(text)
