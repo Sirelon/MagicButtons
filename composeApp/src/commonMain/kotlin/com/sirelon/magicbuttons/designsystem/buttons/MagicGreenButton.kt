@@ -45,6 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sirelon.magicbuttons.designsystem.Typography
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -203,13 +204,13 @@ private fun DrawScope.drawAlGradient(brush: Brush, cornerRadius: CornerRadius) {
 
 @Composable
 private fun ButtonText(text: String, shadowColor: Color) {
-    // TODO: PT Sans font https://fonts.google.com/specimen/PT+Sans
     Text(
         text = text,
         style = TextStyle(
             fontWeight = FontWeight.W400,
             fontSize = 38.sp,
             textAlign = TextAlign.Center,
+            fontFamily = Typography.ptSansFonts(),
             letterSpacing = 0.sp,
             color = Color(0xFFFFFFFF),
             shadow = Shadow(
