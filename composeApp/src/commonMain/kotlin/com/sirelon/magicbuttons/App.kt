@@ -10,7 +10,6 @@ import com.sirelon.magicbuttons.feature.green.GreenScreenUI
 import com.sirelon.magicbuttons.feature.green.di.greenModule
 import kotlinx.serialization.Serializable
 import org.jetbrains.compose.ui.tooling.preview.Preview
-
 import org.koin.compose.KoinApplication
 
 @Serializable

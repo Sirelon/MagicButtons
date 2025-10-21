@@ -2,6 +2,7 @@ package com.sirelon.magicbuttons.designsystem.buttons
 
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.animateDp
@@ -14,12 +15,10 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,14 +47,13 @@ import androidx.compose.ui.unit.sp
 import com.sirelon.magicbuttons.designsystem.AppTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
-private const val ANIMATION_DURATION = 150
-private val ANIMATION_EASING = EaseOut
-
 @Composable
 fun MagicBlueButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    animationDuration: Int = 150,
+    animationEasing: Easing = EaseOut,
     interaction: MutableInteractionSource = remember { MutableInteractionSource() },
 ) {
     val radiusDp = 16.dp
@@ -67,7 +65,7 @@ fun MagicBlueButton(
     val transition = updateTransition(targetState = pressed, label = "BlueButtonPressedAnimation")
 
     val transitionSpecFunc: @Composable Transition.Segment<Boolean>.() -> FiniteAnimationSpec<Float> =
-        { tween(ANIMATION_DURATION, easing = ANIMATION_EASING) }
+        { tween(animationDuration, easing = animationEasing) }
 
     val outlineBorderAlpha by transition.animateFloat(
         label = "outlineBorderAlpha",
@@ -101,7 +99,7 @@ fun MagicBlueButton(
 
     val bgColor1 by transition.animateColor(
         label = "bgColor1",
-        transitionSpec = { tween(ANIMATION_DURATION, easing = EaseOut) },
+        transitionSpec = { tween(animationDuration, easing = animationEasing) },
         targetValueByState = {
             if (it) mainBgColor.copy(alpha = 0.15f) else mainBgColor.copy(alpha = 0.3f)
         }
@@ -109,7 +107,7 @@ fun MagicBlueButton(
 
     val bgColor2 by transition.animateColor(
         label = "bgColor2",
-        transitionSpec = { tween(ANIMATION_DURATION, easing = EaseOut) },
+        transitionSpec = { tween(animationDuration, easing = animationEasing) },
         targetValueByState = {
             if (it) mainBgColor.copy(alpha = 0.2f) else mainBgColor.copy(alpha = 0.1f)
         }
@@ -117,15 +115,15 @@ fun MagicBlueButton(
 
     val translationY by transition.animateDp(
         label = "translationY",
-        transitionSpec = { tween(ANIMATION_DURATION, easing = EaseOut) },
+        transitionSpec = { tween(animationDuration, easing = animationEasing) },
         targetValueByState = { if (it) 2.dp else 0.dp },
     )
 
     Box(
         modifier = modifier
             .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+            // Padding here needed to show shadows properly
             .padding(8.dp)
-            .size(width = ANIMATION_DURATION.dp, height = 52.dp)
             .graphicsLayer {
                 this.translationY = translationY.toPx()
             }
@@ -214,14 +212,19 @@ fun MagicBlueButton(
                 this.color = Color(0xFF0D1626)
             }
     ) {
-        ButtonText(text)
+        ButtonText(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(horizontal = 44.5.dp, vertical = 15.dp),
+            text = text,
+        )
     }
 }
 
 @Composable
-private inline fun BoxScope.ButtonText(text: String) {
+private fun ButtonText(text: String, modifier: Modifier) {
     Text(
-        modifier = Modifier.align(Alignment.Center),
+        modifier = modifier,
         text = text,
         style = TextStyle(
             fontWeight = FontWeight.W600,
