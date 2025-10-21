@@ -1,6 +1,7 @@
 package com.sirelon.magicbuttons.designsystem.buttons
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -29,7 +30,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import magicbuttons.composeapp.generated.resources.Res
+import magicbuttons.composeapp.generated.resources._6
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -46,16 +51,22 @@ fun Test() = Box(
     val pressed by interaction.collectIsPressedAsState()
     val mainColor = Color(0xB2CCFF)
 
+    Image(
+        modifier = Modifier
+            .matchParentSize()
+            .blur(50.dp),
+        contentScale = ContentScale.Crop,
+        painter = painterResource(Res.drawable._6),
+        contentDescription = null,
+    )
+
     Box(
         modifier = Modifier
             .matchParentSize()
             .background(color = Color(0xD10D1A35))
-            .blur(50.dp)
     )
 
-
     if (true) {
-
         Box(
             modifier = Modifier
                 .size(width = 150.dp, height = 60.dp)
