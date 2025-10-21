@@ -37,12 +37,6 @@ internal class GreenViewModel : ViewModel() {
     private val effectEmitter = Channel<GreenContract.Effect>()
     val effectFlow: Flow<GreenContract.Effect> = effectEmitter.receiveAsFlow()
 
-    init {
-        viewModelScope.launch {
-            stateEmitter.emit(GreenContract.State(buttonText = "Старт", counter = 0))
-        }
-    }
-
     private fun initialState(): GreenContract.State =
         GreenContract.State(buttonText = "Старт", counter = 0)
 
