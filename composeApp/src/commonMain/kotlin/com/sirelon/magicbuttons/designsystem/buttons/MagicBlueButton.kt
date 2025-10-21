@@ -43,10 +43,13 @@ import com.sirelon.magicbuttons.designsystem.AppTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
-fun MagicBlueButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun MagicBlueButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    interaction: MutableInteractionSource = remember { MutableInteractionSource() }
+) {
     val radiusDp = 16.dp
-
-    val interaction = remember { MutableInteractionSource() }
 
     val pressed by interaction.collectIsPressedAsState()
 

@@ -47,7 +47,7 @@ fun App() {
                 }
 
                 composable<Route.Blue> {
-                    BlueScreenUI()
+                    BlueScreenUI(onBack = navController::popBackStack)
                 }
             }
         }
