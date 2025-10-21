@@ -1,5 +1,8 @@
 package com.sirelon.magicbuttons.designsystem.buttons
 
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -24,8 +27,10 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.draw.innerShadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -47,39 +52,82 @@ fun MagicBlueButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    interaction: MutableInteractionSource = remember { MutableInteractionSource() }
+    interaction: MutableInteractionSource = remember { MutableInteractionSource() },
 ) {
     val radiusDp = 16.dp
 
     val pressed by interaction.collectIsPressedAsState()
 
+//    val pressed = true
+
+    val outlineBorderAlpha by animateFloatAsState(
+        targetValue = if (pressed) 0.3f else 0f,
+        animationSpec = tween(150, easing = EaseOut)
+    )
+
+    val innerShadowAlpha by animateFloatAsState(
+        targetValue = if (pressed) 0.25f else 0f,
+        animationSpec = tween(150, easing = EaseOut)
+    )
+
+    val outerShadow1Alpha by animateFloatAsState(
+        targetValue = if (pressed) 0f else 0.25f,
+        animationSpec = tween(150, easing = EaseOut)
+    )
+
+    val outerShadow2Alpha by animateFloatAsState(
+        targetValue = if (pressed) 0f else 0.3f,
+        animationSpec = tween(150, easing = EaseOut)
+    )
+
     Box(
         // TODO: Size
         modifier = modifier
-            .size(width = 150.dp, height = 60.dp)
+            .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+            .padding(8.dp)
+            .size(width = 150.dp, height = 52.dp)
             .clickable(
                 enabled = true,
                 onClick = onClick,
                 indication = null,
                 interactionSource = interaction,
             )
-            .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
-            .padding(8.dp)
+
+            .drawBehind {
+                val strokeWidth = 1.dp.toPx()
+                drawRoundRect(
+                    color = Color.Black.copy(alpha = outlineBorderAlpha),
+                    topLeft = Offset(-strokeWidth / 2, -strokeWidth / 2),
+                    size = Size(size.width + strokeWidth, size.height + strokeWidth),
+                    cornerRadius = CornerRadius(radiusDp.toPx()),
+                    style = Stroke(width = strokeWidth)
+                )
+            }
+
+            // TODO: Check inner color
+            .innerShadow(RoundedCornerShape(radiusDp)) {
+                this.offset = Offset(x = 0f, y = 2.dp.toPx())
+                this.radius = 1.dp.toPx()
+                this.alpha = innerShadowAlpha
+                this.color = Color(0xFF0D1626)
+            }
+
             .dropShadow(shape = RoundedCornerShape(radiusDp)) {
                 this.radius = 4.dp.toPx()
                 this.offset = Offset(x = 0f, y = 4.dp.toPx())
                 this.color = Color(0xFF000000)
-                this.alpha = 0.25f
+                this.alpha = outerShadow1Alpha
 //                this.color = Color.Red
             }
             .dropShadow(shape = RoundedCornerShape(radiusDp)) {
                 this.spread = -2.dp.toPx()
                 this.radius = 4.dp.toPx()
                 this.offset = Offset(x = 0f, y = 4.dp.toPx())
+
 //                this.color = Color.Green
 
                 this.color = Color(0xFF000000)
-                this.alpha = 0.3f
+                this.alpha = outerShadow2Alpha
             }
             .drawBehind {
                 drawRoundRect(
@@ -88,7 +136,51 @@ fun MagicBlueButton(
                     blendMode = BlendMode.Clear
                 )
             }
-            .blueBg(radiusDp)
+
+            .drawWithCache {
+                val strokeWidth = 1.dp.toPx()
+
+                val mainColor = Color(0xB2CCFF)
+                val bgGradient = Brush.verticalGradient(
+                    colors = if (pressed) {
+                        listOf(
+                            mainColor.copy(alpha = 0.15f),
+                            mainColor.copy(alpha = 0.2f),
+                        )
+                    } else {
+                        listOf(
+                            mainColor.copy(alpha = 0.3f),
+                            mainColor.copy(alpha = 0.10f)
+                        )
+                    }
+                )
+
+                val borderGradient = Brush.verticalGradient(
+                    colors = listOf(
+                        mainColor.copy(alpha = 0.1f),
+                        mainColor.copy(alpha = 0.05f)
+                    )
+                )
+
+                val cornerRadius = CornerRadius(radiusDp.toPx())
+
+                onDrawBehind {
+                    drawRoundRect(
+                        brush = bgGradient,
+                        blendMode = BlendMode.Hardlight,
+                        cornerRadius = cornerRadius,
+                    )
+
+                    drawRoundRect(
+                        brush = borderGradient,
+                        style = Stroke(
+                            width = strokeWidth,
+                        ),
+                        cornerRadius = cornerRadius,
+                    )
+                }
+            }
+//            .blueBg(radiusDp)
     ) {
         ButtonText(text)
     }
