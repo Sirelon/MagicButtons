@@ -65,8 +65,13 @@ fun MagicBlueButton(
         animationSpec = tween(150, easing = EaseOut)
     )
 
-    val innerShadowAlpha by animateFloatAsState(
+    val innerShadow1Alpha by animateFloatAsState(
         targetValue = if (pressed) 0.25f else 0f,
+        animationSpec = tween(150, easing = EaseOut)
+    )
+
+    val innerShadow2Alpha by animateFloatAsState(
+        targetValue = if (pressed) 1f else 0f,
         animationSpec = tween(150, easing = EaseOut)
     )
 
@@ -86,6 +91,9 @@ fun MagicBlueButton(
             .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
             .padding(8.dp)
             .size(width = 150.dp, height = 52.dp)
+            .graphicsLayer {
+                translationY = if (pressed) 2.dp.toPx() else 0f
+            }
             .clickable(
                 enabled = true,
                 onClick = onClick,
@@ -108,7 +116,7 @@ fun MagicBlueButton(
             .innerShadow(RoundedCornerShape(radiusDp)) {
                 this.offset = Offset(x = 0f, y = 2.dp.toPx())
                 this.radius = 1.dp.toPx()
-                this.alpha = innerShadowAlpha
+                this.alpha = innerShadow1Alpha
                 this.color = Color(0xFF0D1626)
             }
 
@@ -128,6 +136,10 @@ fun MagicBlueButton(
 
                 this.color = Color(0xFF000000)
                 this.alpha = outerShadow2Alpha
+            }
+            .dropShadow(RoundedCornerShape(radiusDp)) {
+                color = Color(0xFF0D0F1A)
+                alpha = innerShadow2Alpha
             }
             .drawBehind {
                 drawRoundRect(
