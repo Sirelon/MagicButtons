@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -32,20 +33,21 @@ import magicbuttons.composeapp.generated.resources._6
 import magicbuttons.composeapp.generated.resources.ic_arrow_left
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import kotlin.random.Random
 
 private const val ANIMATION_DURATION = 150
 private val ANIMATION_EASING = EaseOut
 
 @Composable
-fun BlueScreenUI(onBack: () -> Unit) {
-    BlueScreen(onBack = onBack)
+fun BlueScreen(counter: Int, onBack: () -> Unit) {
+    BlueScreenUI(counter = counter, onBack = onBack)
 }
 
 @Composable
-private fun BlueScreen(onBack: () -> Unit) {
+private fun BlueScreenUI(counter: Int, onBack: () -> Unit) {
     Scaffold(
         contentWindowInsets = WindowInsets(),
-        topBar = { TopBar(onBack) }
+        topBar = { TopBar(counter, onBack) },
     ) { paddingValues ->
         val interaction = remember { MutableInteractionSource() }
 
@@ -87,9 +89,15 @@ private fun BlueScreen(onBack: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TopBar(onBack: () -> Unit) {
+private fun TopBar(counter: Int, onBack: () -> Unit) {
     CenterAlignedTopAppBar(
-        title = { Text("Blue Button Screen") },
+        title = {
+            Text(
+                text = "Blue Button Screen (counter: $counter)",
+                maxLines = 1,
+                autoSize = TextAutoSize.StepBased(),
+            )
+        },
         navigationIcon = {
             IconButton(onBack) {
                 Icon(
@@ -104,5 +112,8 @@ private fun TopBar(onBack: () -> Unit) {
 @Preview
 @Composable
 private fun BlueScreenUIPreview() {
-    BlueScreenUI(onBack = {})
+    BlueScreen(
+        counter = Random.nextInt(0, 999),
+        onBack = {},
+    )
 }

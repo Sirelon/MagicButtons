@@ -4,9 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.sirelon.magicbuttons.designsystem.AppTheme
-import com.sirelon.magicbuttons.feature.blue.BlueScreenUI
-import com.sirelon.magicbuttons.feature.green.GreenScreenUI
+import com.sirelon.magicbuttons.feature.blue.BlueScreen
+import com.sirelon.magicbuttons.feature.green.GreenScreen
 import com.sirelon.magicbuttons.feature.green.di.greenModule
 import kotlinx.serialization.Serializable
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -38,15 +39,18 @@ fun App() {
                 startDestination = Route.Green,
             ) {
                 composable<Route.Green> {
-                    GreenScreenUI(
+                    GreenScreen(
                         openBlueScreen = {
-                            navController.navigate(Route.Blue(counter = it))
+                            navController.navigate(Route.Blue(counter = it)) {
+                                this.launchSingleTop = true
+                            }
                         },
                     )
                 }
 
                 composable<Route.Blue> {
-                    BlueScreenUI(onBack = navController::popBackStack)
+                    val counter = it.toRoute<Route.Blue>().counter
+                    BlueScreen(counter = counter, onBack = navController::popBackStack)
                 }
             }
         }

@@ -8,17 +8,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 internal interface GreenContract {
 
     data class State(
         val buttonText: String,
-        val buttonVisible: Boolean,
+        val counter: Int,
     )
 
     sealed interface Event {
         object ButtonClicked : Event
+        object GoToBlueClicked : Event
     }
 
     sealed interface Effect {
@@ -37,23 +39,26 @@ internal class GreenViewModel : ViewModel() {
 
     init {
         viewModelScope.launch {
-            stateEmitter.emit(GreenContract.State(buttonText = "Старт", buttonVisible = true))
+            stateEmitter.emit(GreenContract.State(buttonText = "Старт", counter = 0))
         }
     }
 
     private fun initialState(): GreenContract.State =
-        GreenContract.State(buttonText = "", buttonVisible = false)
+        GreenContract.State(buttonText = "Старт", counter = 0)
 
     fun onEvent(event: GreenContract.Event) {
         when (event) {
             GreenContract.Event.ButtonClicked -> {
-                setEffect { GreenContract.Effect.GoToBlue(counter = 10) }
+                stateEmitter.update { it.copy(counter = it.counter + 1) }
+            }
+
+            GreenContract.Event.GoToBlueClicked -> {
+                setEffect { GreenContract.Effect.GoToBlue(counter = stateFlow.value.counter) }
             }
         }
     }
 
     private fun setEffect(effect: () -> GreenContract.Effect) {
-
         viewModelScope.launch {
             effectEmitter.send(effect())
         }

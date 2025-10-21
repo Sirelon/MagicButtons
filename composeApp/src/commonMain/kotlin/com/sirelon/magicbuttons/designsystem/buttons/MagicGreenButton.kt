@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -55,7 +56,7 @@ internal fun MagicGreenButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
 ) {
-    val backBgColor = Color(0xFF43A980)
+    val bgColor = Color(0xFF43A980)
 
     val interaction = remember { MutableInteractionSource() }
 
@@ -80,11 +81,6 @@ internal fun MagicGreenButton(
                 indication = null,
                 interactionSource = interaction,
             )
-            // TODO: Size.
-            .size(
-                width = 224.dp,
-                height = 236.dp,
-            )
     ) {
         // shadow
         val buttonDepth = 17.dp
@@ -94,8 +90,8 @@ internal fun MagicGreenButton(
                 .padding(top = buttonDepth)
                 .dropShadow(shape = RoundedCornerShape(outerRadius)) {
                     color = Color(0x29000000)
-                    radius = 3f
-                    offset = Offset(0F, 3F)
+                    radius = 3.dp.toPx()
+                    offset = Offset(0F, 3.dp.toPx())
                     spread = 0F
                     alpha = shadowAlpha
                 },
@@ -106,7 +102,7 @@ internal fun MagicGreenButton(
                 .matchParentSize()
                 .drawBehind {
                     drawRoundRect(
-                        color = backBgColor,
+                        color = bgColor,
                         topLeft = Offset(x = 0f, y = inset.toPx()),
                         cornerRadius = CornerRadius(outerRadius.toPx()),
                     )
@@ -149,15 +145,16 @@ internal fun MagicGreenButton(
                             cornerRadius = cornerRadius,
                             brush = borderGradient
                         )
-                        drawAlGradient(
+                        drawRoundRect(
                             brush = bgGradient,
+                            blendMode = BlendMode.Screen,
                             cornerRadius = cornerRadius,
                         )
                     }
                 },
             contentAlignment = Alignment.Center,
         ) {
-            ButtonText(text = text, shadowColor = backBgColor)
+            ButtonText(text = text, shadowColor = bgColor)
         }
     }
 }
@@ -194,17 +191,10 @@ private fun DrawScope.drawBorder(
     }
 }
 
-private fun DrawScope.drawAlGradient(brush: Brush, cornerRadius: CornerRadius) {
-    drawRoundRect(
-        brush = brush,
-        blendMode = BlendMode.Screen,
-        cornerRadius = cornerRadius,
-    )
-}
-
 @Composable
 private fun ButtonText(text: String, shadowColor: Color) {
     Text(
+        modifier = Modifier.wrapContentSize(),
         text = text,
         style = TextStyle(
             fontWeight = FontWeight.W400,
@@ -227,6 +217,13 @@ private fun ButtonText(text: String, shadowColor: Color) {
 @Composable
 fun MagicGreenButtonPreview() {
     Box(modifier = Modifier.fillMaxSize().safeContentPadding()) {
-        MagicGreenButton(text = "Старт", onClick = {})
+        MagicGreenButton(
+            modifier = Modifier.size(
+                width = 224.dp,
+                height = 236.dp,
+            ),
+            text = "Старт",
+            onClick = {},
+        )
     }
 }
