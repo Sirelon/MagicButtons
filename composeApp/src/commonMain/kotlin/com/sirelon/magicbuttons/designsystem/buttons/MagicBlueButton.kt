@@ -178,8 +178,8 @@ fun MagicBlueButton(
                 val borderStroke = Stroke(width = strokeWidth)
                 val borderOffset = Offset(-strokeWidth / 2, -strokeWidth / 2)
                 val borderColor = Color(0xFF000000).copy(alpha = outlineBorderAlpha)
-                onDrawBehind {
 
+                onDrawBehind {
                     // clear shadow colors inside button
                     drawRoundRect(
                         color = Color.Transparent,

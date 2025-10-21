@@ -7,6 +7,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -23,7 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
@@ -62,17 +63,14 @@ private fun BlueScreenUI(counter: Int, onBack: () -> Unit) {
             modifier = Modifier.fillMaxSize().padding(paddingValues),
             contentAlignment = Alignment.Center,
         ) {
-            Image(
+            BackgroundImage()
+
+            Box(
                 modifier = Modifier
                     .matchParentSize()
-                    .drawWithContent {
-                        drawContent()
+                    .drawBehind {
                         drawRect(color = bgColor)
-                    }
-                    .blur(50.dp),
-                contentScale = ContentScale.Crop,
-                painter = painterResource(Res.drawable._6),
-                contentDescription = null,
+                    },
             )
 
             MagicBlueButton(
@@ -85,6 +83,18 @@ private fun BlueScreenUI(counter: Int, onBack: () -> Unit) {
             )
         }
     }
+}
+
+@Composable
+private fun BoxScope.BackgroundImage() {
+    Image(
+        modifier = Modifier
+            .matchParentSize()
+            .blur(50.dp),
+        contentScale = ContentScale.Crop,
+        painter = painterResource(Res.drawable._6),
+        contentDescription = null,
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
