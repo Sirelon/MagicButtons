@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,6 +37,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -194,7 +194,6 @@ private fun DrawScope.drawBorder(
 @Composable
 private fun ButtonText(text: String, shadowColor: Color) {
     Text(
-        modifier = Modifier.wrapContentSize(),
         text = text,
         style = TextStyle(
             fontWeight = FontWeight.W400,
@@ -203,11 +202,13 @@ private fun ButtonText(text: String, shadowColor: Color) {
             fontFamily = Typography.ptSansFonts(),
             letterSpacing = 0.sp,
             color = Color(0xFFFFFFFF),
-            shadow = Shadow(
-                color = shadowColor,
-                offset = Offset(0f, 1f),
-                blurRadius = 2f,
-            )
+            shadow = with(LocalDensity.current) {
+                Shadow(
+                    color = shadowColor,
+                    offset = Offset(x = 0f, y = 1.dp.toPx()),
+                    blurRadius = 2.dp.toPx(),
+                )
+            }
         )
     )
 }
