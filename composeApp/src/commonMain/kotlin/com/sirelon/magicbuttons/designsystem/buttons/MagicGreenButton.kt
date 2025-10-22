@@ -1,5 +1,6 @@
 package com.sirelon.magicbuttons.designsystem.buttons
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -30,12 +31,8 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathOperation
 import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
@@ -44,6 +41,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sirelon.magicbuttons.designsystem.Typography
@@ -57,12 +55,24 @@ internal fun MagicGreenButton(
     enabled: Boolean = true,
 ) {
     val bgColor = Color(0xFF43A980)
+    val surfaceColor = Color(0xFF50B58D)
 
     val interaction = remember { MutableInteractionSource() }
 
     val pressed by interaction.collectIsPressedAsState()
     val inset by animateDpAsState(
-        targetValue = if (pressed) 18.dp else 0.dp,
+        targetValue = if (pressed) 17.dp else 0.dp,
+        animationSpec = tween(durationMillis = 75, easing = LinearEasing),
+    )
+
+    val topGradientColor by animateColorAsState(
+        targetValue =
+            if (pressed) Color.White.copy(alpha = 0.065f) else Color.White.copy(alpha = 0.13f),
+        animationSpec = tween(durationMillis = 75, easing = LinearEasing),
+    )
+    val bottomGradientColor by animateColorAsState(
+        targetValue =
+            if (pressed) Color.White.copy(alpha = 0.15f) else Color.White.copy(alpha = 0.30f),
         animationSpec = tween(durationMillis = 75, easing = LinearEasing),
     )
 
@@ -120,38 +130,31 @@ internal fun MagicGreenButton(
                 .clip(RoundedCornerShape(innerCorner))
                 .padding(1.dp)
                 .drawWithCache {
-                    val strokeWidth = 1.dp.toPx()
-
-                    val borderGradient = Brush.verticalGradient(
-                        colors = listOf(
-                            Color.White.copy(alpha = 0.13f),
-                            Color.White.copy(alpha = 0f),
-                            Color.White.copy(alpha = 0.40f)
-                        )
-                    )
+                    val cornerRadius = CornerRadius(innerCorner.toPx())
 
                     val bgGradient = Brush.verticalGradient(
                         colors = listOf(
-                            Color.White.copy(alpha = 0.13f),
+                            topGradientColor,
                             Color.White.copy(alpha = 0f),
-                            Color.White.copy(alpha = 0.30f)
+                            bottomGradientColor
                         )
                     )
-                    val cornerRadius = CornerRadius(innerCorner.toPx())
 
                     onDrawBehind {
-                        drawBorder(
-                            strokeWidth = strokeWidth,
+                        drawRoundRect(
+                            color = surfaceColor,
                             cornerRadius = cornerRadius,
-                            brush = borderGradient
                         )
+
                         drawRoundRect(
                             brush = bgGradient,
                             blendMode = BlendMode.Screen,
                             cornerRadius = cornerRadius,
                         )
                     }
-                },
+                }
+                .border(innerCorner)
+            ,
             contentAlignment = Alignment.Center,
         ) {
             ButtonText(text = text, shadowColor = bgColor)
@@ -159,34 +162,49 @@ internal fun MagicGreenButton(
     }
 }
 
-private fun DrawScope.drawBorder(
-    strokeWidth: Float,
-    cornerRadius: CornerRadius,
-    brush: Brush
-) {
-    val rr = RoundRect(
-        top = 0f,
-        bottom = size.height,
-        left = -strokeWidth / 2,
-        right = size.width + strokeWidth / 2,
-        cornerRadius = cornerRadius
-    )
-    val path = Path().apply { addRoundRect(rr) }
+private fun Modifier.border(cornerRadiusDp: Dp) = this.drawWithCache {
+    val strokeWidth = 1.dp.toPx()
 
-    val clipRect = RoundRect(
-        top = 0f,
-        bottom = size.height,
+    val borderGradient = Brush.verticalGradient(
+        colors = listOf(
+            Color.White.copy(alpha = 0.13f),
+            Color.White.copy(alpha = 0f),
+            Color.White.copy(alpha = 0.40f)
+        )
+    )
+
+    val cornerRadius = CornerRadius(cornerRadiusDp.toPx())
+
+    val outerRect = RoundRect(
         left = 0f,
+        top = 0f,
         right = size.width,
+        bottom = size.height,
         cornerRadius = cornerRadius
     )
-    val clipPath = Path().apply { addRoundRect(clipRect) }
 
-    clipPath(clipPath) {
+    // Create the inner rounded rect (inset by border width on top/bottom only)
+    val innerRect = RoundRect(
+        left = 0f,
+        top = strokeWidth,
+        right = size.width,
+        bottom = size.height - strokeWidth,
+        cornerRadius = cornerRadius,
+    )
+
+    val outerPath = Path().apply { addRoundRect(outerRect) }
+    val innerPath = Path().apply { addRoundRect(innerRect) }
+
+    // Subtract inner from outer to get the border region
+    val borderPath = Path().apply {
+        op(outerPath, innerPath, PathOperation.Difference)
+    }
+
+    onDrawBehind {
+        // Border
         drawPath(
-            path = path,
-            brush = brush,
-            style = Stroke(width = strokeWidth, cap = StrokeCap.Round, join = StrokeJoin.Round),
+            path = borderPath,
+            brush = borderGradient
         )
     }
 }
