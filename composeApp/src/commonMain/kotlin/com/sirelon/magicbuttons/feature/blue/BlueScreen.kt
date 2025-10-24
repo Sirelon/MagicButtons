@@ -23,18 +23,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.sirelon.magicbuttons.designsystem.buttons.MagicBlueButton
+import dev.chrisbanes.haze.HazeDefaults
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 import magicbuttons.composeapp.generated.resources.Res
 import magicbuttons.composeapp.generated.resources._6
 import magicbuttons.composeapp.generated.resources.ic_arrow_left
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import kotlin.random.Random
 
 private const val ANIMATION_DURATION = 150
 private val ANIMATION_EASING = EaseOut
@@ -51,8 +53,9 @@ private fun BlueScreenUI(counter: Int, onBack: () -> Unit) {
         topBar = { TopBar(counter, onBack) },
     ) { paddingValues ->
         val interaction = remember { MutableInteractionSource() }
-
         val pressed by interaction.collectIsPressedAsState()
+
+        val haze = rememberHazeState(blurEnabled = true)
 
         val bgColor by animateColorAsState(
             targetValue = if (pressed) Color(0xD10D1A35) else Color(0xFF4A5B7C),
@@ -60,17 +63,18 @@ private fun BlueScreenUI(counter: Int, onBack: () -> Unit) {
         )
 
         Box(
-            modifier = Modifier.fillMaxSize().padding(paddingValues),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
             contentAlignment = Alignment.Center,
         ) {
-            BackgroundImage()
+            BackgroundImage(modifier = Modifier.hazeSource(haze))
 
             Box(
                 modifier = Modifier
                     .matchParentSize()
-                    .drawBehind {
-                        drawRect(color = bgColor)
-                    },
+                    .hazeEffect(haze) { blurRadius = 35.dp }
+                    .drawBehind { drawRect(color = bgColor) }
             )
 
             MagicBlueButton(
@@ -86,13 +90,13 @@ private fun BlueScreenUI(counter: Int, onBack: () -> Unit) {
 }
 
 @Composable
-private fun BoxScope.BackgroundImage() {
+private fun BoxScope.BackgroundImage(modifier: Modifier) {
     Image(
         modifier = Modifier
             .matchParentSize()
-            .blur(50.dp),
-        contentScale = ContentScale.Crop,
+            .then(modifier),
         painter = painterResource(Res.drawable._6),
+        contentScale = ContentScale.Crop,
         contentDescription = null,
     )
 }
@@ -122,8 +126,39 @@ private fun TopBar(counter: Int, onBack: () -> Unit) {
 @Preview
 @Composable
 private fun BlueScreenUIPreview() {
-    BlueScreen(
-        counter = Random.nextInt(0, 999),
-        onBack = {},
-    )
+//    BlueScreen(
+//        counter = Random.nextInt(0, 999),
+//        onBack = {},
+//    )
+
+    Box(modifier = Modifier.fillMaxSize()) {
+//        BackgroundImage(rememberHazeState())
+
+
+        val hazeState = rememberHazeState(blurEnabled = true)
+
+        Box(Modifier.fillMaxSize()) {
+            Image(
+                painter = painterResource(Res.drawable._6),
+                contentDescription = null,
+                modifier = Modifier
+                    .matchParentSize()
+                    .hazeSource(state = hazeState),
+                contentScale = ContentScale.Crop
+            )
+
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .hazeEffect(
+                        state = hazeState,
+                        style = HazeDefaults.style(
+                            blurRadius = 30.dp,
+                            backgroundColor = Color(0xD10D1A35)
+                        )
+                    )
+            )
+        }
+    }
+
 }

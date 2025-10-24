@@ -1,7 +1,7 @@
+
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import java.io.File
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -65,6 +65,7 @@ kotlin {
             implementation(libs.coil.network.ktor)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.navigation.compose)
+            implementation(libs.haze)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -86,6 +87,9 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
+
+        renderscriptTargetApi = 30
+        renderscriptSupportModeEnabled = true
     }
     packaging {
         resources {
