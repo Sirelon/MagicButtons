@@ -15,7 +15,9 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
@@ -27,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.draw.innerShadow
@@ -45,6 +48,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sirelon.magicbuttons.designsystem.AppTheme
@@ -70,7 +74,13 @@ fun MagicBlueButton(
     val transitionSpecFunc: @Composable Transition.Segment<Boolean>.() -> FiniteAnimationSpec<Float> =
         { tween(animationDuration, easing = animationEasing) }
 
-    val outlineBorderAlpha by transition.animateFloat(
+    val innerBorderAlpha by transition.animateFloat(
+        label = "outlineBorderAlpha",
+        transitionSpec = transitionSpecFunc,
+        targetValueByState = { if (it) 0.0f else 1f }
+    )
+
+    val pressedBorderAlpha by transition.animateFloat(
         label = "outlineBorderAlpha",
         transitionSpec = transitionSpecFunc,
         targetValueByState = { if (it) 0.3f else 0f }
@@ -122,14 +132,17 @@ fun MagicBlueButton(
         targetValueByState = { if (it) 2.dp else 0.dp },
     )
 
+    val outerPadding = 8.dp
+
     Box(
         modifier = modifier
+            .defaultMinSize(
+                minHeight = 52.dp + outerPadding,
+                minWidth = 150.dp + outerPadding,
+            )
             .semantics {
                 role = Role.Button
             }
-            .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
-            // Padding here needed to show shadows properly
-            .padding(8.dp)
             .graphicsLayer {
                 this.translationY = translationY.toPx()
             }
@@ -139,6 +152,108 @@ fun MagicBlueButton(
                 indication = null,
                 interactionSource = interaction,
             )
+    ) {
+        ShadowLayer(
+            outerShadow1Alpha = outerShadow1Alpha,
+            outerShadow2Alpha = outerShadow2Alpha,
+            pressedShadow = pressedShadow,
+            radiusDp = radiusDp,
+            outerPadding = outerPadding,
+        )
+
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .padding(outerPadding)
+                // Padding here needed to show shadows properly
+                .drawWithCache {
+                    val strokeWidth = 1.dp.toPx()
+                    val bgGradient = Brush.verticalGradient(
+                        colors = listOf(
+                            bgColor1,
+                            bgColor2,
+                        )
+                    )
+
+                    val borderGradient = Brush.verticalGradient(
+                        colors = listOf(
+                            mainBgColor.copy(alpha = 0.1f),
+                            mainBgColor.copy(alpha = 0.05f)
+                        )
+                    )
+
+                    val cornerRadius = CornerRadius(radiusDp.toPx())
+                    val borderStroke = Stroke(width = strokeWidth)
+
+                    val innerBorderOffset = Offset(strokeWidth / 2f, strokeWidth / 2f)
+                    val innerBorderSize = size.copy(
+                        width = size.width - strokeWidth,
+                        height = size.height - strokeWidth
+                    )
+
+                    val outerBorderSize = Size(size.width + strokeWidth, size.height + strokeWidth)
+                    val outerBorderOffset = Offset(-strokeWidth / 2, -strokeWidth / 2)
+                    val pressedBorderColor = Color(0xFF000000)
+
+                    onDrawBehind {
+                        // Dark Border that is visible when btn is in pressed state
+                        drawRoundRect(
+                            color = pressedBorderColor,
+                            topLeft = outerBorderOffset,
+                            size = outerBorderSize,
+                            cornerRadius = cornerRadius,
+                            style = borderStroke,
+                            alpha = pressedBorderAlpha
+                        )
+
+                        // Button's Background
+                        drawRoundRect(
+                            brush = bgGradient,
+                            blendMode = BlendMode.Hardlight,
+                            cornerRadius = cornerRadius,
+                        )
+
+                        drawRoundRect(
+                            brush = borderGradient,
+                            topLeft = innerBorderOffset,
+                            size = innerBorderSize,
+                            cornerRadius = cornerRadius,
+                            style = borderStroke,
+                            alpha = innerBorderAlpha,
+                        )
+                    }
+                }
+                .innerShadow(shape = shape) {
+                    this.offset = Offset(x = 0f, y = 2.dp.toPx())
+                    this.radius = 1.dp.toPx()
+                    this.alpha = innerShadowAlpha
+                    this.color = Color(0xFF0D1626)
+                }
+        ) {
+            ButtonText(
+                modifier = Modifier.align(Alignment.Center),
+                text = text,
+            )
+        }
+    }
+}
+
+@Composable
+private fun BoxScope.ShadowLayer(
+    outerShadow1Alpha: Float,
+    outerShadow2Alpha: Float,
+    pressedShadow: Float,
+    radiusDp: Dp,
+    outerPadding: Dp,
+) {
+    val shape = RoundedCornerShape(radiusDp)
+    Box(
+        modifier = Modifier
+            .matchParentSize()
+            .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+            // Padding here needed to show shadows properly
+            .padding(outerPadding)
+
             .dropShadow(shape = shape) {
                 this.radius = 4.dp.toPx()
                 this.offset = Offset(x = 0f, y = 4.dp.toPx())
@@ -157,74 +272,16 @@ fun MagicBlueButton(
                 this.color = Color(0xFF0D0F1A)
                 this.alpha = pressedShadow
             }
-            .drawWithCache {
-                val strokeWidth = 1.dp.toPx()
-                val bgGradient = Brush.verticalGradient(
-                    colors = listOf(
-                        bgColor1,
-                        bgColor2,
-                    )
-                )
-
-                val borderGradient = Brush.verticalGradient(
-                    colors = listOf(
-                        mainBgColor.copy(alpha = 0.1f),
-                        mainBgColor.copy(alpha = 0.05f)
-                    )
-                )
-
+            .drawBehind {
                 val cornerRadius = CornerRadius(radiusDp.toPx())
-                val outlineBorderSize = Size(size.width + strokeWidth, size.height + strokeWidth)
-                val borderStroke = Stroke(width = strokeWidth)
-                val borderOffset = Offset(-strokeWidth / 2, -strokeWidth / 2)
-                val borderColor = Color(0xFF000000).copy(alpha = outlineBorderAlpha)
-
-                onDrawBehind {
-                    // clear shadow colors inside button
-                    drawRoundRect(
-                        color = Color.Transparent,
-                        cornerRadius = cornerRadius,
-                        blendMode = BlendMode.Clear
-                    )
-
-                    // Dark Border that is visible when btn is in pressed state
-                    drawRoundRect(
-                        color = borderColor,
-                        topLeft = borderOffset,
-                        size = outlineBorderSize,
-                        cornerRadius = cornerRadius,
-                        style = borderStroke
-                    )
-
-                    // Button's Background
-                    drawRoundRect(
-                        brush = bgGradient,
-                        blendMode = BlendMode.Hardlight,
-                        cornerRadius = cornerRadius,
-                    )
-
-                    // Gradient Border
-                    drawRoundRect(
-                        brush = borderGradient,
-                        style = borderStroke,
-                        cornerRadius = cornerRadius,
-                    )
-                }
-            }
-            .innerShadow(shape = shape) {
-                this.offset = Offset(x = 0f, y = 2.dp.toPx())
-                this.radius = 1.dp.toPx()
-                this.alpha = innerShadowAlpha
-                this.color = Color(0xFF0D1626)
-            }
-    ) {
-        ButtonText(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .padding(horizontal = 44.5.dp, vertical = 15.dp),
-            text = text,
-        )
-    }
+                // clear shadow colors inside button
+                drawRoundRect(
+                    color = Color.Transparent,
+                    cornerRadius = cornerRadius,
+                    blendMode = BlendMode.Clear
+                )
+            },
+    )
 }
 
 @Composable

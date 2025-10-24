@@ -23,12 +23,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.sirelon.magicbuttons.designsystem.buttons.MagicBlueButton
-import dev.chrisbanes.haze.HazeDefaults
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
@@ -75,6 +75,12 @@ private fun BlueScreenUI(counter: Int, onBack: () -> Unit) {
                     .matchParentSize()
                     .hazeEffect(haze) { blurRadius = 35.dp }
                     .drawBehind { drawRect(color = bgColor) }
+                    /// AAAAAAAA
+//                    .dropShadow(RectangleShape) {
+//                        color = Color(0x40000000)
+//                        radius = 4.dp.toPx()
+//                        offset = Offset(0f, 4.dp.toPx())
+//                    }
             )
 
             MagicBlueButton(
@@ -143,21 +149,10 @@ private fun BlueScreenUIPreview() {
                 contentDescription = null,
                 modifier = Modifier
                     .matchParentSize()
-                    .hazeSource(state = hazeState),
+                    .blur(50.dp),
                 contentScale = ContentScale.Crop
             )
 
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .hazeEffect(
-                        state = hazeState,
-                        style = HazeDefaults.style(
-                            blurRadius = 30.dp,
-                            backgroundColor = Color(0xD10D1A35)
-                        )
-                    )
-            )
         }
     }
 
